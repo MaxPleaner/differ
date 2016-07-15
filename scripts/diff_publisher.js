@@ -2,10 +2,27 @@ Array.prototype.subtract =  function(arr) {
   return this.filter(function(x) { return arr.indexOf(x) < 0 })
 };
 
-window.differClient = {
-  globalStore: {},
+// The only two public methods are
+// addOrChange(record) and remove(record)
+
+window.diffPublisher = {
+  globalStore: {
+    recordKey(record) {
+      return `${record.type}-${record.id}`
+    },
+    add(record){
+      localStorage.setItem(this.recordKey(record),JSON.stringify(record))
+    },
+    fetch(record) {
+      localStorage.getItem(this.recordKey(record))
+    },
+    remove(record) {
+      localStorage.removeItem(this.recordKey(record))
+    }
+  },
   emit(name, msg) {
-    console.log(`${name} ${msg}`);
+    var event = new Event(name, { msg: msg })
+    window.dispatchEvent(event)
   },
   addOrChange(record) {
     var change;
@@ -13,19 +30,19 @@ window.differClient = {
     if (!(this.globalStore[record.type])) {
       this.globalStore[record.type] = [];
     }
-    prevRecord = this.globalStore[record.type][record.id];
+    prevRecord = this.globalStore.fetch(record);
     if (prevRecord) {
       for(change of this.diff(prevRecord, record)) {
         if (change) { this.emit(change.name, change.msg) }
       }
     } else {
-      this.globalStore[record.type][record.id] = record;
+      this.globalStore.add(record)
       this.emit("add", `${record.id} ${record.type}`)
     }
   },
   remove(record) {
     this.checkThatRecordIsValid(record);
-    delete this.globalStore[record.type][record.id];
+    this.globalStore.delete(record)
     this.emit("delete", `${record.type} ${record.id}`);
   },
   diff(record1, record2) {
@@ -57,16 +74,16 @@ window.differClient = {
     } else { return undefined }
   },
   deletedAttribute(record, key) {
-    delete this.globalStore[record.type][record.id][key];
-    return { name: "delete", msg: `${record.type} ${record.id} ${key}` };
+    this.globalStore.delete(record)
+    return { name: "deleteAttr", msg: `${record.type} ${record.id} ${key}` };
   },
   addedAttribute(record, key, newVal){
-    this.globalStore[record.type][record.id][key] = newVal;
-    return { name: "add", msg:`${record.type} ${record.id} ${key}` };
+    this.globalStore.set(record)
+    return { name: "addAttr", msg:`${record.type} ${record.id} ${key}` };
   },
   changedAttribute(record, key, newVal) {
-    this.globalStore[record.type][record.id][key] = newVal;
-    return { name: "change", msg: `${record.type} ${record.id} ${key}` };
+    this.globalStore.set(record)
+    return { name: "changeAttr", msg: `${record.type} ${record.id} ${key}` };
   },
   checkThatRecordIsValid(record){
     var attr;
@@ -80,3 +97,4 @@ window.differClient = {
     return typeof(obj) !== 'undefined';
   },
 };
+
