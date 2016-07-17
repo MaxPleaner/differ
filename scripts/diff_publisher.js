@@ -1,28 +1,29 @@
 Array.prototype.subtract =  function(arr) {
-  return this.filter(function(x) { return arr.indexOf(x) < 0 })
+  return this.filter(function(x) { return arr.indexOf(x) < 0 });
 };
 
 // The only two public methods are
 // addOrChange(record) and remove(record)
 
-window.diffPublisher = {
+window.DiffPublisher = {
   globalStore: {
     recordKey(record) {
-      return `${record.type}-${record.id}`
+      return `${record.type}-${record.id}`;
     },
     add(record){
-      localStorage.setItem(this.recordKey(record),JSON.stringify(record))
+      localStorage.setItem(this.recordKey(record), JSON.stringify(record));
     },
     fetch(record) {
-      localStorage.getItem(this.recordKey(record))
+      result = localStorage.getItem(this.recordKey(record));
+      return result ? JSON.parse(result) : undefined;
     },
     remove(record) {
-      localStorage.removeItem(this.recordKey(record))
+      result = localStorage.removeItem(this.recordKey(record));
+      return result ? JSON.parse(result) : undefined;
     }
   },
   emit(name, msg) {
-    var event = new Event(name, { msg: msg })
-    window.dispatchEvent(event)
+    document.dispatchEvent(new CustomEvent(name, { detail: msg }));
   },
   addOrChange(record) {
     var change;
@@ -36,14 +37,14 @@ window.diffPublisher = {
         if (change) { this.emit(change.name, change.msg) }
       }
     } else {
-      this.globalStore.add(record)
-      this.emit("add", `${record.id} ${record.type}`)
+      this.globalStore.add(record);
+      this.emit("add", JSON.stringify(record));
     }
   },
   remove(record) {
     this.checkThatRecordIsValid(record);
-    this.globalStore.delete(record)
-    this.emit("delete", `${record.type} ${record.id}`);
+    this.globalStore.delete(record);
+    this.emit("delete", JSON.stringify(record));
   },
   diff(record1, record2) {
     var results, record1keys, record2keys, key,
@@ -68,22 +69,27 @@ window.diffPublisher = {
     }
     return results;
   },
+  alterAttrObject(record, key, val) {
+    obj = { type: record.type, id: record.id, key: key };
+    if (val) { obj.val = val }
+    return JSON.stringify(obj);
+  },
   diffAttrs(record, key, newVal) {
     if (record[key] !== newVal) {
       return this.changedAttribute(record, key, newVal);
     } else { return undefined }
   },
   deletedAttribute(record, key) {
-    this.globalStore.delete(record)
-    return { name: "deleteAttr", msg: `${record.type} ${record.id} ${key}` };
+    this.globalStore.delete(record);
+    return { name: "deleteAttr", msg: this.alterAttrObject(record, key) };
   },
   addedAttribute(record, key, newVal){
-    this.globalStore.set(record)
-    return { name: "addAttr", msg:`${record.type} ${record.id} ${key}` };
+    this.globalStore.add(record);
+    return { name: "addAttr", msg:this.alterAttrObject(record, key, newVal) };
   },
   changedAttribute(record, key, newVal) {
-    this.globalStore.set(record)
-    return { name: "changeAttr", msg: `${record.type} ${record.id} ${key}` };
+    this.globalStore.add(record);
+    return { name: "changeAttr", msg: this.alterAttrObject(record, key, newVal) };
   },
   checkThatRecordIsValid(record){
     var attr;
