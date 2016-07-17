@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160717192941) do
+ActiveRecord::Schema.define(version: 20160717193559) do
 
   create_table "update_caches", force: :cascade do |t|
     t.integer "user_id"
@@ -18,6 +18,14 @@ ActiveRecord::Schema.define(version: 20160717192941) do
     t.boolean "is_delete"
     t.text    "record_data"
     t.integer "record_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string   "password_digest"
+    t.string   "name"
+    t.string   "session_token"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
   end
 
 end
