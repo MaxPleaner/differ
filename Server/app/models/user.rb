@@ -16,4 +16,5 @@ class User < ApplicationRecord
   def logout
     update(session_token: nil)    
   end
+
 end
