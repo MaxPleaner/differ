@@ -1,20 +1,15 @@
 require 'secure_random'
 
 class User < ApplicationRecord
-  validates :password_digest, presence: true
-  validates :name,            presence: true
-  has_secure_password
 
+  include Auth # app/models/concerns/auth.rb
+  include UpdateCaches # app/models/concerns/update_caches.rb
+
+  validates :name,            presence: true
   def name=(val)
     super(val.blank? ? nil : val)
   end
 
-  def login(password)
-    update(session_token: SecureRandom.urlsafe_base64)
-  end
 
-  def logout
-    update(session_token: nil)    
-  end
 
 end
