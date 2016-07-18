@@ -1,0 +1,2 @@
+class DataUpdateController < ApplicationController
+end
