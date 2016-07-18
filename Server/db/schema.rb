@@ -10,14 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160717193559) do
+ActiveRecord::Schema.define(version: 20160718023722) do
 
   create_table "update_caches", force: :cascade do |t|
-    t.integer "user_id"
-    t.string  "record_type"
-    t.boolean "is_delete"
-    t.text    "record_data"
-    t.integer "record_id"
+    t.integer  "user_id"
+    t.integer  "record_id"
+    t.string   "record_type"
+    t.text     "record_data"
+    t.boolean  "is_delete"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
   end
 
   create_table "users", force: :cascade do |t|

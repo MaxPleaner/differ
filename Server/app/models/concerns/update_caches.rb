@@ -26,6 +26,6 @@ module UpdateCaches
   end
 
   def add_create_cmd_to_update_cache(record_type, record_id, record, is_delete=false)
-      update_caches.create(record_type: record_type, record_id: record_id, record_data: record.attributes.to_json, is_delete: is_delete)    
+      update_caches.create(record_type: record_type, record_id: record_id, record_data: record.attributes.to_json, is_delete: is_delete)
   end
 end

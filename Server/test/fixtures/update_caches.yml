@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user_id: 1
+  record_id: 1
+  record_type: MyString
+  record_data: MyText
+  is_delete: false
+
+two:
+  user_id: 1
+  record_id: 1
+  record_type: MyString
+  record_data: MyText
+  is_delete: false
